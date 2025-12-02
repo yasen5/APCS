@@ -50,16 +50,26 @@ public class Screen extends JPanel implements KeyListener {
         setLayout(null);
         setFocusable(true);
         try {
-            // Load the data file to read in
             FileInputStream fis = new FileInputStream("map.txt");
 
-            // Create a data stream to read in
             ObjectInputStream in = new ObjectInputStream(fis);
 
-            // viewportX = in.readInt();
-            // viewportY = in.readInt();
-            
             map = (MyHashTable<Location, GridObject>) in.readObject();
+            
+            fis.close();
+            in.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Failed to read!");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try {
+            FileInputStream fis = new FileInputStream("player.txt");
+
+            ObjectInputStream in = new ObjectInputStream(fis);
+
+            viewportX = in.readInt();
+            viewportY = in.readInt();
             
             fis.close();
             in.close();
@@ -72,7 +82,6 @@ public class Screen extends JPanel implements KeyListener {
         Contents[] contentOptions = Contents.values();
         if (!(map instanceof MyHashTable<Location, GridObject>)) {
             map = new MyHashTable<>();
-            System.out.println("Failed to read!");
             for (int row = 0; row < 100; row++) {
                 for (int col = 0; col < 100; col++) {
                     Background bg = (col == 0 || col == 99 || row == 0 || row == 99) ? Background.BORDER : backgroundOptions[(int)(Math.random()*backgroundOptions.length-1)];
@@ -98,7 +107,6 @@ public class Screen extends JPanel implements KeyListener {
 
     public Dimension getPreferredSize() {
         return new Dimension(10*gridBoxSize, 10*gridBoxSize);
-
     }
 
     public void paintComponent(Graphics g) {
@@ -138,20 +146,19 @@ public class Screen extends JPanel implements KeyListener {
             case KeyEvent.VK_D -> moveViewport(1, 0);
         }
         repaint();
-        // try {
-        //     FileOutputStream out;
-        //     ObjectOutputStream outObj;
-        //     out = new FileOutputStream("map.txt");
-        //     outObj = new ObjectOutputStream(out);
-        //     // Create a data stream to read in
-        //     outObj.writeInt(viewportX);
-        //     outObj.writeInt(viewportY);
-        //     outObj.close();
-        // } catch (FileNotFoundException ex) {
-        //     System.out.println("Didn't write");
-        // } catch (Exception ex) {
-        //     ex.printStackTrace();
-        // }
+        try {
+            FileOutputStream out;
+            ObjectOutputStream outObj;
+            out = new FileOutputStream("player.txt");
+            outObj = new ObjectOutputStream(out);
+            outObj.writeInt(viewportX);
+            outObj.writeInt(viewportY);
+            outObj.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Didn't write player coordinates");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public void keyReleased(KeyEvent e) {}
