@@ -41,10 +41,10 @@ public class Screen extends JPanel implements KeyListener {
 
     public static MyHashTable<Location, GridObject> map;
 
-    private final int gridBoxSize = 100;
-
     private int viewportX = 0, viewportY = 0; 
     private final int viewportWidth = 10, viewportHeight = 10;
+
+    private final int gridBoxSize = 1000 / viewportWidth;
 
     public Screen() {
         setLayout(null);
@@ -84,7 +84,8 @@ public class Screen extends JPanel implements KeyListener {
             map = new MyHashTable<>();
             for (int row = 0; row < 100; row++) {
                 for (int col = 0; col < 100; col++) {
-                    Background bg = (col == 0 || col == 99 || row == 0 || row == 99) ? Background.BORDER : backgroundOptions[(int)(Math.random()*backgroundOptions.length-1)];
+                    boolean is_border = col == 0 || row == 0 || (col == 99 && row < 84) || (row == 99 && col < 10) || (col == 10 && row > 89) || (row == 89 && col >= 10 && col < 30) || (col == 30 && row >= 84 && row < 90) || (row == 84 && col > 30);
+                    Background bg = is_border ? Background.BORDER : backgroundOptions[(int)(Math.random()*(backgroundOptions.length-1))];
                     map.put(new Location(row, col), new GridObject(bg, contentOptions[(int)(Math.random()*2)]));
                 }
             }
@@ -106,7 +107,7 @@ public class Screen extends JPanel implements KeyListener {
     }
 
     public Dimension getPreferredSize() {
-        return new Dimension(10*gridBoxSize, 10*gridBoxSize);
+        return new Dimension(1000, 1000);
     }
 
     public void paintComponent(Graphics g) {
@@ -132,7 +133,7 @@ public class Screen extends JPanel implements KeyListener {
     public void moveViewport(int xDiff, int yDiff) {
         viewportX += xDiff;
         viewportY += yDiff;
-        if (viewportY < 0 || viewportY > 100-10 || viewportX < 0 || viewportX > 100-10) {
+        if (viewportY < 0 || viewportY > 100 - viewportHeight || viewportX < 0 || viewportX > 100 - viewportWidth) {
             viewportY -= yDiff;
             viewportX -= xDiff;
         }
