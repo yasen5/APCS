@@ -1,0 +1,160 @@
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import javax.swing.*;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.io.ObjectInputStream;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+public class Screen extends JPanel implements KeyListener {
+    private enum Background {
+        WATER,
+        ROAD,
+        DIRT,
+        GRASS,
+        BORDER
+    }
+
+    private enum Contents {
+        TREE,
+        HOUSE,
+        BANDELIER,
+        RIO_GRANDE_BRIDGE,
+        ALBUQUERQUE_OLD_TOWN,
+        ASSISI_BASILICA,
+        SANTA_FE_PLAZA
+    }
+
+    private static record GridObject(Background bg, Contents contents) implements Serializable {}
+
+    private static record Location(int row, int col) implements Serializable {
+        @Override
+        public int hashCode() {
+            return 100 * row + col;
+        }
+    }
+
+    public static MyHashTable<Location, GridObject> map;
+
+    private final int gridBoxSize = 100;
+
+    private int viewportX = 0, viewportY = 0; 
+    private final int viewportWidth = 10, viewportHeight = 10;
+
+    public Screen() {
+        setLayout(null);
+        setFocusable(true);
+        try {
+            // Load the data file to read in
+            FileInputStream fis = new FileInputStream("map.txt");
+
+            // Create a data stream to read in
+            ObjectInputStream in = new ObjectInputStream(fis);
+
+            // viewportX = in.readInt();
+            // viewportY = in.readInt();
+            
+            map = (MyHashTable<Location, GridObject>) in.readObject();
+            
+            fis.close();
+            in.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Using default list");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        Background[] backgroundOptions = Background.values();
+        Contents[] contentOptions = Contents.values();
+        if (!(map instanceof MyHashTable<Location, GridObject>)) {
+            map = new MyHashTable<>();
+            System.out.println("Failed to read!");
+            for (int row = 0; row < 100; row++) {
+                for (int col = 0; col < 100; col++) {
+                    Background bg = (col == 0 || col == 99 || row == 0 || row == 99) ? Background.BORDER : backgroundOptions[(int)(Math.random()*backgroundOptions.length-1)];
+                    map.put(new Location(row, col), new GridObject(bg, contentOptions[(int)(Math.random()*2)]));
+                }
+            }
+            try {
+                FileOutputStream out;
+                ObjectOutputStream outObj;
+                out = new FileOutputStream("map.txt");
+                outObj = new ObjectOutputStream(out);
+                // Create a data stream to read in
+                outObj.writeObject(map);
+                outObj.close();
+            } catch (FileNotFoundException ex) {
+                System.out.println("Didn't write");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        addKeyListener(this);
+    }
+
+    public Dimension getPreferredSize() {
+        return new Dimension(10*gridBoxSize, 10*gridBoxSize);
+
+    }
+
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        for (int row = viewportY; row < viewportY + viewportHeight; row++) {
+            for (int col = viewportX; col < viewportX + viewportWidth; col++) {
+                for (GridObject obj : map.get(new Location(row, col))) {
+                    switch (obj.bg) {
+                        case WATER -> g.setColor(Color.BLUE);
+                        case ROAD -> g.setColor(Color.BLACK);
+                        case DIRT -> g.setColor(new Color(102, 70, 11));
+                        case GRASS -> g.setColor(Color.GREEN);
+                        case BORDER -> g.setColor(Color.PINK);
+                    }
+                }
+                g.fillRect((col-viewportX) * gridBoxSize, (row-viewportY) * gridBoxSize, gridBoxSize, gridBoxSize);  
+            }
+        }
+        g.setColor(Color.pink);
+        g.drawRect(5 * gridBoxSize, 5 * gridBoxSize, gridBoxSize, gridBoxSize);
+    }
+
+    public void moveViewport(int xDiff, int yDiff) {
+        viewportX += xDiff;
+        viewportY += yDiff;
+        if (viewportY < 0 || viewportY > 100-10 || viewportX < 0 || viewportX > 100-10) {
+            viewportY -= yDiff;
+            viewportX -= xDiff;
+        }
+    }
+
+    public void keyPressed(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_W -> moveViewport(0, -1);
+            case KeyEvent.VK_A -> moveViewport(-1, 0);
+            case KeyEvent.VK_S -> moveViewport(0, 1);
+            case KeyEvent.VK_D -> moveViewport(1, 0);
+        }
+        repaint();
+        // try {
+        //     FileOutputStream out;
+        //     ObjectOutputStream outObj;
+        //     out = new FileOutputStream("map.txt");
+        //     outObj = new ObjectOutputStream(out);
+        //     // Create a data stream to read in
+        //     outObj.writeInt(viewportX);
+        //     outObj.writeInt(viewportY);
+        //     outObj.close();
+        // } catch (FileNotFoundException ex) {
+        //     System.out.println("Didn't write");
+        // } catch (Exception ex) {
+        //     ex.printStackTrace();
+        // }
+    }
+
+    public void keyReleased(KeyEvent e) {}
+
+    public void keyTyped(KeyEvent e) {}
+}
