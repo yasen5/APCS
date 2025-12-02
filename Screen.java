@@ -84,8 +84,23 @@ public class Screen extends JPanel implements KeyListener {
             map = new MyHashTable<>();
             for (int row = 0; row < 100; row++) {
                 for (int col = 0; col < 100; col++) {
-                    boolean is_border = col == 0 || row == 0 || (col == 99 && row < 84) || (row == 99 && col < 10) || (col == 10 && row > 89) || (row == 89 && col >= 10 && col < 30) || (col == 30 && row >= 84 && row < 90) || (row == 84 && col > 30);
-                    Background bg = is_border ? Background.BORDER : backgroundOptions[(int)(Math.random()*(backgroundOptions.length-1))];
+                    boolean isRoad = row % 5 == 0 || col % 5 == 0;
+                    boolean isGrass = col % 10 < 5 && row % 10 < 5;
+                    boolean isWater = col % 16 < 3 && row % 13 < 3;
+                    boolean isBorder = col == 0 || row == 0 || (col == 99 && row < 84) || (row == 99 && col < 10) || (col == 10 && row > 89) || (row == 89 && col >= 10 && col < 30) || (col == 30 && row >= 84 && row < 90) || (row == 84 && col > 30);
+                    Background bg = Background.DIRT;
+                    if (isBorder) {
+                        bg = Background.BORDER;
+                    }
+                    else if (isRoad) {
+                        bg = Background.ROAD;
+                    }
+                    else if (isWater) {
+                        bg = Background.WATER;
+                    }
+                    else if (isGrass) {
+                        bg = Background.GRASS;
+                    }
                     map.put(new Location(row, col), new GridObject(bg, contentOptions[(int)(Math.random()*2)]));
                 }
             }
@@ -134,6 +149,12 @@ public class Screen extends JPanel implements KeyListener {
         viewportX += xDiff;
         viewportY += yDiff;
         if (viewportY < 0 || viewportY > 100 - viewportHeight || viewportX < 0 || viewportX > 100 - viewportWidth) {
+            viewportY -= yDiff;
+            viewportX -= xDiff;
+            return;
+        }
+        Background bg = map.get(new Location(viewportY + viewportHeight/2, viewportX + viewportWidth/2)).get(0).bg;
+        if (bg == Background.BORDER || bg == Background.WATER) {
             viewportY -= yDiff;
             viewportX -= xDiff;
         }
