@@ -3,11 +3,16 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.ObjectInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
@@ -21,16 +26,34 @@ public class Screen extends JPanel implements KeyListener {
     }
 
     private enum Contents {
+        NONE,
         TREE,
         HOUSE,
         BANDELIER,
         RIO_GRANDE_BRIDGE,
         ALBUQUERQUE_OLD_TOWN,
         ASSISI_BASILICA,
-        SANTA_FE_PLAZA
+        SANTA_FE_PLAZA;
     }
 
-    private static record GridObject(Background bg, Contents contents) implements Serializable {}
+    private static record GridObject(Background bg, Contents contents) implements Serializable {
+    }
+
+    private static MyHashMap<Contents, BufferedImage> contentImages;
+
+    static {
+        contentImages = new MyHashMap<>();
+        for (Contents content : Contents.values()) {
+            if (content == Contents.NONE) {
+                continue;
+            }
+            try {
+                contentImages.put(content, ImageIO.read(new File("images/" + content.name().toLowerCase() + ".png")));
+            } catch (IOException e) {
+                System.out.println("Error for reading " + content.name() + " " + e);
+            }
+        }
+    }
 
     private static record Location(int row, int col) implements Serializable {
         @Override
@@ -41,7 +64,7 @@ public class Screen extends JPanel implements KeyListener {
 
     public static MyHashTable<Location, GridObject> map;
 
-    private int viewportX = 0, viewportY = 0; 
+    private int viewportX = 0, viewportY = 0;
     private final int viewportWidth = 10, viewportHeight = 10;
 
     private final int gridBoxSize = 1000 / viewportWidth;
@@ -55,7 +78,7 @@ public class Screen extends JPanel implements KeyListener {
             ObjectInputStream in = new ObjectInputStream(fis);
 
             map = (MyHashTable<Location, GridObject>) in.readObject();
-            
+
             fis.close();
             in.close();
         } catch (FileNotFoundException ex) {
@@ -70,7 +93,7 @@ public class Screen extends JPanel implements KeyListener {
 
             viewportX = in.readInt();
             viewportY = in.readInt();
-            
+
             fis.close();
             in.close();
         } catch (FileNotFoundException ex) {
@@ -87,21 +110,20 @@ public class Screen extends JPanel implements KeyListener {
                     boolean isRoad = row % 5 == 0 || col % 5 == 0;
                     boolean isGrass = col % 10 < 5 && row % 10 < 5;
                     boolean isWater = col % 16 < 3 && row % 13 < 3;
-                    boolean isBorder = col == 0 || row == 0 || (col == 99 && row < 84) || (row == 99 && col < 10) || (col == 10 && row > 89) || (row == 89 && col >= 10 && col < 30) || (col == 30 && row >= 84 && row < 90) || (row == 84 && col > 30);
+                    boolean isBorder = col == 0 || row == 0 || (col == 99 && row < 84) || (row == 99 && col < 10)
+                            || (col == 10 && row > 89) || (row == 89 && col >= 10 && col < 30)
+                            || (col == 30 && row >= 84 && row < 90) || (row == 84 && col > 30);
                     Background bg = Background.DIRT;
                     if (isBorder) {
                         bg = Background.BORDER;
-                    }
-                    else if (isRoad) {
+                    } else if (isRoad) {
                         bg = Background.ROAD;
-                    }
-                    else if (isWater) {
+                    } else if (isWater) {
                         bg = Background.WATER;
-                    }
-                    else if (isGrass) {
+                    } else if (isGrass) {
                         bg = Background.GRASS;
                     }
-                    map.put(new Location(row, col), new GridObject(bg, contentOptions[(int)(Math.random()*2)]));
+                    map.put(new Location(row, col), new GridObject(bg, contentOptions[(int) (Math.random() * 3)]));
                 }
             }
             try {
@@ -135,10 +157,18 @@ public class Screen extends JPanel implements KeyListener {
                         case ROAD -> g.setColor(Color.BLACK);
                         case DIRT -> g.setColor(new Color(102, 70, 11));
                         case GRASS -> g.setColor(Color.GREEN);
-                        case BORDER -> g.setColor(Color.PINK);
+                        case BORDER -> g.setColor(Color.RED);
+                    }
+                    g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
+                            gridBoxSize);
+                    if (obj.contents != Contents.NONE) {
+                        // System.out.println("Drawing");
+                        System.out.println("Val is null: " + (contentImages.get(obj.contents) == null));
+                        g.drawImage(contentImages.get(obj.contents), (col - viewportX) * gridBoxSize,
+                                (row - viewportY) * gridBoxSize, gridBoxSize,
+                                gridBoxSize, this);
                     }
                 }
-                g.fillRect((col-viewportX) * gridBoxSize, (row-viewportY) * gridBoxSize, gridBoxSize, gridBoxSize);  
             }
         }
         g.setColor(Color.pink);
@@ -153,7 +183,7 @@ public class Screen extends JPanel implements KeyListener {
             viewportX -= xDiff;
             return;
         }
-        Background bg = map.get(new Location(viewportY + viewportHeight/2, viewportX + viewportWidth/2)).get(0).bg;
+        Background bg = map.get(new Location(viewportY + viewportHeight / 2, viewportX + viewportWidth / 2)).get(0).bg;
         if (bg == Background.BORDER || bg == Background.WATER) {
             viewportY -= yDiff;
             viewportX -= xDiff;
@@ -183,7 +213,9 @@ public class Screen extends JPanel implements KeyListener {
         }
     }
 
-    public void keyReleased(KeyEvent e) {}
+    public void keyReleased(KeyEvent e) {
+    }
 
-    public void keyTyped(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {
+    }
 }
