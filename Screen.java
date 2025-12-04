@@ -17,14 +17,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 public class Screen extends JPanel implements KeyListener {
-    private enum Background {
-        WATER,
-        ROAD,
-        DIRT,
-        GRASS,
-        BORDER
-    }
-
     private enum Contents {
         NONE,
         TREE,
@@ -33,24 +25,25 @@ public class Screen extends JPanel implements KeyListener {
         RIO_GRANDE_DEL_NORTE_NATIONAL_MONUMENT,
         RIO_GRANDE_GORGE_BRIDGE,
         ASSISI_BASILICA,
-        GILA_NATIONAL_FOREST;
-    }
-
-    private static record GridObject(Background bg, Contents contents) implements Serializable {
+        GILA_NATIONAL_FOREST,
+        WATER,
+        ROAD,
+        DIRT,
+        GRASS,
+        BORDER
     }
 
     private static MyHashMap<Contents, BufferedImage> contentImages;
 
     static {
         contentImages = new MyHashMap<>();
-        for (Contents content : Contents.values()) {
-            if (content == Contents.NONE) {
-                continue;
-            }
+        Contents[] contentValues = Contents.values();
+        for (int i = 1; i < 8; i++) {
             try {
-                contentImages.put(content, ImageIO.read(new File("images/" + content.name().toLowerCase() + ".png")));
+                contentImages.put(contentValues[i],
+                        ImageIO.read(new File("images/" + contentValues[i].name().toLowerCase() + ".png")));
             } catch (IOException e) {
-                System.out.println("Error for reading " + content.name() + " " + e);
+                System.out.println("Error for reading " + contentValues[i].name() + " " + e);
             }
         }
     }
@@ -62,7 +55,7 @@ public class Screen extends JPanel implements KeyListener {
         }
     }
 
-    public static MyHashTable<Location, GridObject> map;
+    public static MyHashTable<Location, Contents> map;
 
     private int viewportX = 0, viewportY = 0;
     private final int viewportWidth = 10, viewportHeight = 10;
@@ -77,7 +70,7 @@ public class Screen extends JPanel implements KeyListener {
 
             ObjectInputStream in = new ObjectInputStream(fis);
 
-            map = (MyHashTable<Location, GridObject>) in.readObject();
+            map = (MyHashTable<Location, Contents>) in.readObject();
 
             fis.close();
             in.close();
@@ -101,9 +94,8 @@ public class Screen extends JPanel implements KeyListener {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        Background[] backgroundOptions = Background.values();
-        Contents[] contentOptions = Contents.values();
-        if (!(map instanceof MyHashTable<Location, GridObject>)) {
+        Contents[] options = Contents.values();
+        if (!(map instanceof MyHashTable<Location, Contents>)) {
             map = new MyHashTable<>();
             for (int row = 0; row < 100; row++) {
                 for (int col = 0; col < 100; col++) {
@@ -113,43 +105,39 @@ public class Screen extends JPanel implements KeyListener {
                     boolean isBorder = col == 0 || row == 0 || (col == 99 && row < 84) || (row == 99 && col < 10)
                             || (col == 10 && row > 89) || (row == 89 && col >= 10 && col < 30)
                             || (col == 30 && row >= 84 && row < 90) || (row == 84 && col > 30);
-                    Background bg = Background.DIRT;
+                    Contents bg = Contents.DIRT;
                     if (isBorder) {
-                        bg = Background.BORDER;
+                        bg = Contents.BORDER;
                     } else if (isRoad) {
-                        bg = Background.ROAD;
+                        bg = Contents.ROAD;
                     } else if (isWater) {
-                        bg = Background.WATER;
+                        bg = Contents.WATER;
                     } else if (isGrass) {
-                        bg = Background.GRASS;
+                        bg = Contents.GRASS;
                     }
-                    Contents contents = Contents.NONE;
+                    Contents thingOnTop = Contents.NONE;
                     if (col == 49 && row == 4) {
-                        contents = Contents.RIO_GRANDE_DEL_NORTE_NATIONAL_MONUMENT;
-                    }
-                    else if (col == 49 && row == 14) {
-                        contents = Contents.RIO_GRANDE_GORGE_BRIDGE;
-                    }
-                    else if (col == 44 && row == 24) {
-                        contents = Contents.SANTA_FE_NATIONAL_FOREST;
-                    }
-                    else if (col == 49 && row == 34) {
-                        contents = Contents.ASSISI_BASILICA;
-                    }
-                    else if (col == 14 && row == 69) {
-                        contents = Contents.GILA_NATIONAL_FOREST;
-                    }
-                    else if (bg == bg.GRASS) {
-                        if ((int)(Math.random()*4) == 0) {
-                            contents = Contents.TREE;
+                        thingOnTop = Contents.RIO_GRANDE_DEL_NORTE_NATIONAL_MONUMENT;
+                    } else if (col == 49 && row == 14) {
+                        thingOnTop = Contents.RIO_GRANDE_GORGE_BRIDGE;
+                    } else if (col == 44 && row == 24) {
+                        thingOnTop = Contents.SANTA_FE_NATIONAL_FOREST;
+                    } else if (col == 49 && row == 34) {
+                        thingOnTop = Contents.ASSISI_BASILICA;
+                    } else if (col == 14 && row == 69) {
+                        thingOnTop = Contents.GILA_NATIONAL_FOREST;
+                    } else if (bg == Contents.GRASS) {
+                        if ((int) (Math.random() * 4) == 0) {
+                            thingOnTop = Contents.TREE;
+                        }
+                    } else if (bg == Contents.DIRT) {
+                        if ((int) (Math.random() * 16) == 0) {
+                            thingOnTop = Contents.HOUSE;
                         }
                     }
-                    else if (bg == bg.DIRT) {
-                        if ((int)(Math.random()*16) == 0) {
-                            contents = Contents.HOUSE;
-                        }
-                    }
-                    map.put(new Location(row, col), new GridObject(bg, contents));
+                    Location loc = new Location(row, col);
+                    map.put(loc, bg);
+                    map.put(loc, thingOnTop);
                 }
             }
             try {
@@ -177,20 +165,38 @@ public class Screen extends JPanel implements KeyListener {
         super.paintComponent(g);
         for (int row = viewportY; row < viewportY + viewportHeight; row++) {
             for (int col = viewportX; col < viewportX + viewportWidth; col++) {
-                for (GridObject obj : map.get(new Location(row, col))) {
-                    switch (obj.bg) {
-                        case WATER -> g.setColor(Color.BLUE);
-                        case ROAD -> g.setColor(Color.BLACK);
-                        case DIRT -> g.setColor(new Color(102, 70, 11));
-                        case GRASS -> g.setColor(Color.GREEN);
-                        case BORDER -> g.setColor(Color.RED);
-                    }
-                    g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
-                            gridBoxSize);
-                    if (obj.contents != Contents.NONE) {
-                        g.drawImage(contentImages.get(obj.contents), (col - viewportX) * gridBoxSize,
-                                (row - viewportY) * gridBoxSize, gridBoxSize,
-                                gridBoxSize, this);
+                for (Contents content : map.get(new Location(row, col))) {
+                    switch (content) {
+                        case WATER -> {
+                            g.setColor(Color.BLUE);
+                            g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
+                                    gridBoxSize);
+                        }
+                        case ROAD -> {
+                            g.setColor(Color.BLACK);
+                            g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
+                                    gridBoxSize);
+                        }
+                        case DIRT -> {
+                            g.setColor(new Color(107, 70, 11));
+                            g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
+                                    gridBoxSize);
+                        }
+                        case GRASS -> {
+                            g.setColor(Color.GREEN);
+                            g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
+                                    gridBoxSize);
+                        }
+                        case BORDER -> {
+                            g.setColor(Color.RED);
+                            g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
+                                    gridBoxSize);
+                        }
+                        default -> {
+                            g.drawImage(contentImages.get(content), (col - viewportX) * gridBoxSize,
+                                    (row - viewportY) * gridBoxSize, gridBoxSize,
+                                    gridBoxSize, this);
+                        }
                     }
                 }
             }
@@ -207,10 +213,15 @@ public class Screen extends JPanel implements KeyListener {
             viewportX -= xDiff;
             return;
         }
-        GridObject obj = map.get(new Location(viewportY + viewportHeight / 2, viewportX + viewportWidth / 2)).get(0);
-        if (obj.bg == Background.BORDER || obj.bg == Background.WATER || obj.contents != Contents.NONE) {
-            viewportY -= yDiff;
-            viewportX -= xDiff;
+        for (Contents content : map.get(new Location(viewportY + viewportHeight / 2, viewportX + viewportWidth / 2))) {
+            if (content == Contents.BORDER || content == Contents.WATER || content == Contents.ASSISI_BASILICA
+                    || content == Contents.GILA_NATIONAL_FOREST || content == Contents.HOUSE
+                    || content == Contents.RIO_GRANDE_DEL_NORTE_NATIONAL_MONUMENT
+                    || content == Contents.RIO_GRANDE_GORGE_BRIDGE || content == Contents.SANTA_FE_NATIONAL_FOREST
+                    || content == Contents.TREE) {
+                viewportY -= yDiff;
+                viewportX -= xDiff;
+            }
         }
     }
 
