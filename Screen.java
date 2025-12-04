@@ -29,11 +29,11 @@ public class Screen extends JPanel implements KeyListener {
         NONE,
         TREE,
         HOUSE,
-        BANDELIER,
-        RIO_GRANDE_BRIDGE,
-        ALBUQUERQUE_OLD_TOWN,
+        SANTA_FE_NATIONAL_FOREST,
+        RIO_GRANDE_DEL_NORTE_NATIONAL_MONUMENT,
+        RIO_GRANDE_GORGE_BRIDGE,
         ASSISI_BASILICA,
-        SANTA_FE_PLAZA;
+        GILA_NATIONAL_FOREST;
     }
 
     private static record GridObject(Background bg, Contents contents) implements Serializable {
@@ -123,7 +123,33 @@ public class Screen extends JPanel implements KeyListener {
                     } else if (isGrass) {
                         bg = Background.GRASS;
                     }
-                    map.put(new Location(row, col), new GridObject(bg, contentOptions[(int) (Math.random() * 3)]));
+                    Contents contents = Contents.NONE;
+                    if (col == 49 && row == 4) {
+                        contents = Contents.RIO_GRANDE_DEL_NORTE_NATIONAL_MONUMENT;
+                    }
+                    else if (col == 49 && row == 14) {
+                        contents = Contents.RIO_GRANDE_GORGE_BRIDGE;
+                    }
+                    else if (col == 44 && row == 24) {
+                        contents = Contents.SANTA_FE_NATIONAL_FOREST;
+                    }
+                    else if (col == 49 && row == 34) {
+                        contents = Contents.ASSISI_BASILICA;
+                    }
+                    else if (col == 14 && row == 69) {
+                        contents = Contents.GILA_NATIONAL_FOREST;
+                    }
+                    else if (bg == bg.GRASS) {
+                        if ((int)(Math.random()*4) == 0) {
+                            contents = Contents.TREE;
+                        }
+                    }
+                    else if (bg == bg.DIRT) {
+                        if ((int)(Math.random()*16) == 0) {
+                            contents = Contents.HOUSE;
+                        }
+                    }
+                    map.put(new Location(row, col), new GridObject(bg, contents));
                 }
             }
             try {
@@ -162,8 +188,6 @@ public class Screen extends JPanel implements KeyListener {
                     g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
                             gridBoxSize);
                     if (obj.contents != Contents.NONE) {
-                        // System.out.println("Drawing");
-                        System.out.println("Val is null: " + (contentImages.get(obj.contents) == null));
                         g.drawImage(contentImages.get(obj.contents), (col - viewportX) * gridBoxSize,
                                 (row - viewportY) * gridBoxSize, gridBoxSize,
                                 gridBoxSize, this);
@@ -183,8 +207,8 @@ public class Screen extends JPanel implements KeyListener {
             viewportX -= xDiff;
             return;
         }
-        Background bg = map.get(new Location(viewportY + viewportHeight / 2, viewportX + viewportWidth / 2)).get(0).bg;
-        if (bg == Background.BORDER || bg == Background.WATER) {
+        GridObject obj = map.get(new Location(viewportY + viewportHeight / 2, viewportX + viewportWidth / 2)).get(0);
+        if (obj.bg == Background.BORDER || obj.bg == Background.WATER || obj.contents != Contents.NONE) {
             viewportY -= yDiff;
             viewportX -= xDiff;
         }
