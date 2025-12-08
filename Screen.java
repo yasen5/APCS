@@ -58,7 +58,7 @@ public class Screen extends JPanel implements KeyListener {
     public static MyHashTable<Location, Contents> map;
 
     private int viewportX = 0, viewportY = 0;
-    private final int viewportWidth = 10, viewportHeight = 10;
+    private final int viewportWidth = 100, viewportHeight = 100;
 
     private final int gridBoxSize = 1000 / viewportWidth;
 
@@ -201,8 +201,14 @@ public class Screen extends JPanel implements KeyListener {
                 }
             }
         }
-        g.setColor(Color.pink);
-        g.drawRect(5 * gridBoxSize, 5 * gridBoxSize, gridBoxSize, gridBoxSize);
+        // Tourist
+        g.setColor(new Color(107, 70, 11));
+        g.fillRect((int) (5.25 * gridBoxSize), (int) (5.25 * gridBoxSize), gridBoxSize / 2, gridBoxSize / 2);
+        g.setColor(Color.PINK);
+        g.fillOval((int) ((5.5-0.2) * gridBoxSize), (int) ((5) * gridBoxSize - 0.2),
+                (int) (0.4 * gridBoxSize), (int) (0.4 * gridBoxSize));
+        g.fillRect((int)((5.25-0.1) * gridBoxSize), (int)((5.3) * gridBoxSize), (int)(0.1*gridBoxSize), (int)(gridBoxSize/3));
+        g.fillRect((int)((5.75) * gridBoxSize), (int)((5.3) * gridBoxSize), (int)(0.1*gridBoxSize), (int)(gridBoxSize/3));
     }
 
     public void moveViewport(int xDiff, int yDiff) {
