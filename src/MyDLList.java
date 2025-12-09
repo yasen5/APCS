@@ -1,3 +1,4 @@
+package src;
 import java.util.Iterator;
 import java.io.Serializable;
 
@@ -124,6 +125,13 @@ public class MyDLList<E> implements Iterable<E>, Serializable {
 
     public boolean contains(E elementToCheck) {
         for (E element : this) {
+            if (element instanceof Enum) {
+                Enum elem = (Enum) element;
+                Enum elemToCheck = (Enum) elementToCheck;
+                if (elem.name().equals(elemToCheck.name())) {
+                    return true;
+                }
+            }
             if (element.equals(elementToCheck)) {
                 return true;
             }

@@ -1,3 +1,4 @@
+package src;
 public class MyHashMap<K, V> {
     private Object[] hashArray;
     private int size;
