@@ -9,6 +9,8 @@ import javax.imageio.ImageIO;
 
 import src.Screen;
 import src.Screen.Contents;
+import src.util.MyDLList;
+import src.util.MyHashMap;
 
 public abstract class MovingObj implements Runnable {
     protected static MyHashMap<ObjType, BufferedImage> images;
@@ -39,16 +41,18 @@ public abstract class MovingObj implements Runnable {
 
     public MovingObj(ObjType type) {
         this.type = type;
-        int counter = 0;
         do {
-            System.out.println(++counter);
             loc = new Screen.Location((int) (Math.random() * 100), (int) (Math.random() * 100));
-        } while (canMove(Screen.map.get(loc)));
+        } while (!canMove(Screen.map.get(loc)));
     }
 
     public void drawMe(Graphics g) {
-        g.drawImage(images.get(type), loc.col() * Screen.gridBoxSize, loc.row() * Screen.gridBoxSize,
+        int relativeX =  loc.col() - Screen.viewportX;
+        int relativeY = loc.row() - Screen.viewportY;
+        if (relativeX >= 0 && relativeX < Screen.viewportWidth && relativeY >= 0 && relativeY < Screen.viewportHeight) {
+            g.drawImage(images.get(type), relativeX * Screen.gridBoxSize, relativeY * Screen.gridBoxSize,
                 Screen.gridBoxSize, Screen.gridBoxSize, null);
+        }
     }
 
     protected abstract boolean canMove(MyDLList<Screen.Contents> contents);
@@ -61,14 +65,28 @@ public abstract class MovingObj implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            for (int i = 0; i < 9; i++) {
-                int xDiff = (int) (Math.random() * 2);
-                int yDiff = (int) (Math.random() * 2);
+            int count = 0;
+            for (int i = 0; i < 1000; i++) {
+                count++;
+                int xDiff = (int) (Math.random() * 3) - 1;
+                int yDiff = (int) (Math.random() * 3) - 1;
                 Screen.Location newLoc = new Screen.Location(loc.row() + yDiff, loc.col() + xDiff);
-                if (loc.col() < 100 && loc.row() < 100 && canMove(Screen.map.get(newLoc))) {
+                for (MovingObj obj : Screen.movingObjs) {
+                    if (obj.getLoc().equals(loc)) {
+                        continue;
+                    }
+                }
+                if (newLoc.col() == Screen.viewportX + Screen.viewportWidth/2 && newLoc.row() == Screen.viewportY + Screen.viewportHeight/2) {
+                    System.out.println("Not moving bc of player who is at pos " + Screen.viewportX + Screen.viewportWidth/2 + ", " + Screen.viewportY + Screen.viewportHeight/2);
+                    continue;
+                }
+                if (newLoc.col() > 0 && newLoc.row() > 0 && newLoc.col() < 100 && newLoc.row() < 100 && canMove(Screen.map.get(newLoc))) {
                     this.loc = newLoc;
                     break;
                 }
+            }
+            if (count == 1000) {
+                // System.out.println("Failed");
             }
         }
     }

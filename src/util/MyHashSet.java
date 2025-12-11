@@ -1,4 +1,5 @@
-package src;
+package src.util;
+
 import java.io.Serializable;
 
 public class MyHashSet<E> implements Serializable {
@@ -14,14 +15,7 @@ public class MyHashSet<E> implements Serializable {
         if (contains(obj)) {
             return false;
         } else {
-            int hash = -1;
-            if (obj.getClass().isEnum()) {
-                Enum en = (Enum) obj;
-                hash = en.ordinal();
-            } else {
-                hash = obj.hashCode();
-            }
-            hashArray[hash] = obj;
+            hashArray[HashCode.realHashCode(obj)] = obj;
             size++;
         }
         return true;
@@ -33,14 +27,7 @@ public class MyHashSet<E> implements Serializable {
     }
 
     public boolean contains(Object obj) {
-        int hash = -1;
-        if (obj.getClass().isEnum()) {
-            Enum en = (Enum) obj;
-            hash = en.ordinal();
-        } else {
-            hash = obj.hashCode();
-        }
-        if (hashArray[hash] != null && obj.equals(hashArray[hash])) {
+        if (hashArray[HashCode.realHashCode(obj)] != null && obj.equals(hashArray[HashCode.realHashCode(obj)])) {
             return true;
         }
         return false;
@@ -48,14 +35,7 @@ public class MyHashSet<E> implements Serializable {
 
     public boolean remove(Object obj) {
         if (contains(obj)) {
-            int hash = -1;
-            if (obj.getClass().isEnum()) {
-                Enum en = (Enum) obj;
-                hash = en.ordinal();
-            } else {
-                hash = obj.hashCode();
-            }
-            hashArray[hash] = null;
+            hashArray[HashCode.realHashCode(obj)] = null;
             size--;
             return true;
         }

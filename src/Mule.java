@@ -1,6 +1,7 @@
 package src;
 
 import src.Screen.Contents;
+import src.util.MyDLList;
 
 public class Mule extends MovingObj {
     public Mule() {

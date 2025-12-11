@@ -1,6 +1,7 @@
 package src;
 
 import src.Screen.Contents;
+import src.util.MyDLList;
 
 public class Bear extends MovingObj {
     public Bear() {

@@ -9,6 +9,8 @@ import java.io.ObjectOutputStream;
 import java.util.Scanner;
 
 import src.Screen.Contents;
+import src.util.MyHashMap;
+import src.util.MyHashTable;
 
 public class MapReader {
     public static void main(String[] args) {
@@ -21,7 +23,7 @@ public class MapReader {
         contentMap.put("5", Screen.Contents.GRASS);
         contentMap.put("6", Screen.Contents.ROAD);
         try {
-            FileInputStream fis = new FileInputStream("map.txt");
+            FileInputStream fis = new FileInputStream("/Users/yasen/AdvCSQ2Proj/src/map.txt");
 
             ObjectInputStream in = new ObjectInputStream(fis);
 
@@ -35,7 +37,6 @@ public class MapReader {
                 int col = 0;
                 String line = sc.nextLine();
                 for (String num : line.split(" ")) {
-                    System.out.println("[" + row + "," + col); 
                     Screen.Contents bg = contentMap.get(num);
                     map.put(new Screen.Location(row, col), bg);
                     Contents thingOnTop = null;
@@ -57,8 +58,7 @@ public class MapReader {
                         if ((int) (Math.random() * 16) == 0) {
                             thingOnTop = Contents.HOUSE;
                         }
-                    }
-                    else if (bg == Contents.DESERT) {
+                    } else if (bg == Contents.DESERT) {
                         if ((int) (Math.random() * 16) == 0) {
                             thingOnTop = Contents.CACTUS;
                         }
@@ -75,20 +75,22 @@ public class MapReader {
             fis.close();
             in.close();
         } catch (FileNotFoundException ex) {
-            System.out.println("Failed to read!");
+            System.out.println("Failed to read! ");
+            ex.printStackTrace();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         try {
             FileOutputStream out;
             ObjectOutputStream outObj;
-            out = new FileOutputStream("map.txt");
+            out = new FileOutputStream("src/map.txt");
             outObj = new ObjectOutputStream(out);
             // Create a data stream to read in
             outObj.writeObject(map);
             outObj.close();
         } catch (FileNotFoundException ex) {
             System.out.println("Didn't write");
+            ex.printStackTrace();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

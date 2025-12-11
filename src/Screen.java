@@ -9,6 +9,11 @@ import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+
+import src.util.MyDLList;
+import src.util.MyHashMap;
+import src.util.MyHashTable;
+
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.ObjectInputStream;
@@ -61,16 +66,16 @@ public class Screen extends JPanel implements KeyListener {
     }
 
     public static MyHashTable<Location, Contents> map;
-    private static int viewportX = 0, viewportY = 0;
-    private final static int viewportWidth = 100, viewportHeight = 100;
+    public static int viewportX = 0, viewportY = 0;
+    public final static int viewportWidth = 10, viewportHeight = 10;
     public final static int gridBoxSize = 1000 / viewportWidth;
-    private final MyDLList<MovingObj> movingObjs = new MyDLList<>();
+    public final static MyDLList<MovingObj> movingObjs = new MyDLList<>();
 
     public Screen() {
         setLayout(null);
         setFocusable(true);
         try {
-            FileInputStream fis = new FileInputStream("map.txt");
+            FileInputStream fis = new FileInputStream("src/map.txt");
 
             ObjectInputStream in = new ObjectInputStream(fis);
 
@@ -84,7 +89,7 @@ public class Screen extends JPanel implements KeyListener {
             ex.printStackTrace();
         }
         try {
-            FileInputStream fis = new FileInputStream("player.txt");
+            FileInputStream fis = new FileInputStream("src/player.txt");
 
             ObjectInputStream in = new ObjectInputStream(fis);
 
@@ -98,12 +103,12 @@ public class Screen extends JPanel implements KeyListener {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 100; i++) {
             switch ((int) (Math.random() * 4)) {
                 case 0 -> movingObjs.add(new Car());
-                case 1 -> movingObjs.add(new Car());
-                case 2 -> movingObjs.add(new Car());
-                case 3 -> movingObjs.add(new Car());
+                case 1 -> movingObjs.add(new Boat());
+                case 2 -> movingObjs.add(new Mule());
+                case 3 -> movingObjs.add(new Bear());
             }
         }
         addKeyListener(this);
@@ -216,7 +221,7 @@ public class Screen extends JPanel implements KeyListener {
         try {
             FileOutputStream out;
             ObjectOutputStream outObj;
-            out = new FileOutputStream("player.txt");
+            out = new FileOutputStream("src/player.txt");
             outObj = new ObjectOutputStream(out);
             outObj.writeInt(viewportX);
             outObj.writeInt(viewportY);

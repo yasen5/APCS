@@ -1,4 +1,4 @@
-package src;
+package src.util;
 import java.io.Serializable;
 
 public class DLNode<T> implements Serializable {
