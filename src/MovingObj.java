@@ -82,7 +82,6 @@ public abstract class MovingObj implements Runnable, Serializable {
                     }
                 }
                 if (newLoc.col() == Screen.viewportX + Screen.viewportWidth/2 && newLoc.row() == Screen.viewportY + Screen.viewportHeight/2) {
-                    System.out.println("Not moving bc of player who is at pos " + Screen.viewportX + Screen.viewportWidth/2 + ", " + Screen.viewportY + Screen.viewportHeight/2);
                     continue;
                 }
                 if (newLoc.col() > 0 && newLoc.row() > 0 && newLoc.col() < 100 && newLoc.row() < 100 && canMove(Screen.map.get(newLoc))) {

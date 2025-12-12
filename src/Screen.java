@@ -45,20 +45,6 @@ public class Screen extends JPanel implements KeyListener {
 
     public static MyHashMap<Contents, BufferedImage> contentImages;
 
-    static {
-        contentImages = new MyHashMap<>();
-        Contents[] contentValues = Contents.values();
-        for (int i = 1; i < 8; i++) {
-            try {
-                contentImages.put(contentValues[i],
-                        ImageIO.read(new File("/Users/yasen/AdvCSQ2Proj/src/images/"
-                                + contentValues[i].name().toLowerCase() + ".png")));
-            } catch (IOException e) {
-                System.out.println("Error for reading " + contentValues[i].name() + " " + e);
-            }
-        }
-    }
-
     public static record Location(int row, int col) implements Serializable {
         @Override
         public int hashCode() {
@@ -71,45 +57,66 @@ public class Screen extends JPanel implements KeyListener {
     public final static int viewportWidth = 10, viewportHeight = 10;
     public final static int gridBoxSize = 1000 / viewportWidth;
     public static MyDLList<MovingObj> movingObjs = null;
-    
-        public Screen() {
-            setLayout(null);
-            setFocusable(true);
+    public static MyHashMap<Contents, Color> colorMap = new MyHashMap<>();
+
+    static {
+        contentImages = new MyHashMap<>();
+        Contents[] contentValues = Contents.values();
+        for (int i = 1; i < 8; i++) {
             try {
-                FileInputStream fis = new FileInputStream("src/map.txt");
-    
-                ObjectInputStream in = new ObjectInputStream(fis);
-    
-                map = (MyHashTable<Location, Contents>) in.readObject();
-    
-                fis.close();
-                in.close();
-            } catch (FileNotFoundException ex) {
-                System.out.println("Failed to read!");
-            } catch (Exception ex) {
-                ex.printStackTrace();
+                contentImages.put(contentValues[i],
+                        ImageIO.read(new File("/Users/yasen/AdvCSQ2Proj/src/images/"
+                                + contentValues[i].name().toLowerCase() + ".png")));
+            } catch (IOException e) {
+                System.out.println("Error for reading " + contentValues[i].name() + " " + e);
             }
-            try {
-                FileInputStream fis = new FileInputStream("src/player.txt");
-    
-                ObjectInputStream in = new ObjectInputStream(fis);
-    
-                viewportX = in.readInt();
-                viewportY = in.readInt();
-    
-                fis.close();
-                in.close();
-            } catch (FileNotFoundException ex) {
-                System.out.println("Using default list");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            try {
-                FileInputStream fis = new FileInputStream("src/moving_objs.txt");
-    
-                ObjectInputStream in = new ObjectInputStream(fis);
-    
-                movingObjs = (MyDLList<MovingObj>) in.readObject();
+        }
+        colorMap.put(Contents.WATER, Color.BLUE);
+        colorMap.put(Contents.ROAD, Color.BLACK);
+        colorMap.put(Contents.DIRT, new Color(107, 70, 11));
+        colorMap.put(Contents.BORDER, Color.RED);
+        colorMap.put(Contents.GRASS, Color.GREEN);
+        colorMap.put(Contents.DESERT, Color.YELLOW);
+    }
+
+    public Screen() {
+        setLayout(null);
+        setFocusable(true);
+        try {
+            FileInputStream fis = new FileInputStream("src/map.txt");
+
+            ObjectInputStream in = new ObjectInputStream(fis);
+
+            map = (MyHashTable<Location, Contents>) in.readObject();
+
+            fis.close();
+            in.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Failed to read!");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try {
+            FileInputStream fis = new FileInputStream("src/player.txt");
+
+            ObjectInputStream in = new ObjectInputStream(fis);
+
+            viewportX = in.readInt();
+            viewportY = in.readInt();
+
+            fis.close();
+            in.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Using default list");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try {
+            FileInputStream fis = new FileInputStream("src/moving_objs.txt");
+
+            ObjectInputStream in = new ObjectInputStream(fis);
+
+            movingObjs = (MyDLList<MovingObj>) in.readObject();
 
             fis.close();
             in.close();
@@ -145,42 +152,15 @@ public class Screen extends JPanel implements KeyListener {
         for (int row = viewportY; row < viewportY + viewportHeight; row++) {
             for (int col = viewportX; col < viewportX + viewportWidth; col++) {
                 for (Contents content : map.get(new Location(row, col))) {
-                    switch (content) {
-                        case WATER -> {
-                            g.setColor(Color.BLUE);
-                            g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
-                                    gridBoxSize);
-                        }
-                        case ROAD -> {
-                            g.setColor(Color.BLACK);
-                            g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
-                                    gridBoxSize);
-                        }
-                        case DIRT -> {
-                            g.setColor(new Color(107, 70, 11));
-                            g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
-                                    gridBoxSize);
-                        }
-                        case GRASS -> {
-                            g.setColor(Color.GREEN);
-                            g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
-                                    gridBoxSize);
-                        }
-                        case DESERT -> {
-                            g.setColor(Color.YELLOW);
-                            g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
-                                    gridBoxSize);
-                        }
-                        case BORDER -> {
-                            g.setColor(Color.RED);
-                            g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
-                                    gridBoxSize);
-                        }
-                        default -> {
-                            g.drawImage(contentImages.get(content), (col - viewportX) * gridBoxSize,
-                                    (row - viewportY) * gridBoxSize, gridBoxSize,
-                                    gridBoxSize, this);
-                        }
+                    Color bgColor = colorMap.get(content);
+                    if (bgColor != null) {
+                        g.setColor(bgColor);
+                        g.fillRect((col - viewportX) * gridBoxSize, (row - viewportY) * gridBoxSize, gridBoxSize,
+                                gridBoxSize);
+                    } else {
+                        g.drawImage(contentImages.get(content), (col - viewportX) * gridBoxSize,
+                                (row - viewportY) * gridBoxSize, gridBoxSize,
+                                gridBoxSize, this);
                     }
                 }
             }
