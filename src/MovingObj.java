@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 
 import javax.imageio.ImageIO;
 
@@ -12,7 +13,7 @@ import src.Screen.Contents;
 import src.util.MyDLList;
 import src.util.MyHashMap;
 
-public abstract class MovingObj implements Runnable {
+public abstract class MovingObj implements Runnable, Serializable {
     protected static MyHashMap<ObjType, BufferedImage> images;
 
     static {
@@ -44,6 +45,10 @@ public abstract class MovingObj implements Runnable {
         do {
             loc = new Screen.Location((int) (Math.random() * 100), (int) (Math.random() * 100));
         } while (!canMove(Screen.map.get(loc)));
+    }
+
+    public MovingObj(ObjType type, Screen.Location loc) {
+        this.loc = loc;
     }
 
     public void drawMe(Graphics g) {

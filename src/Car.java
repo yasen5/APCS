@@ -8,6 +8,10 @@ public class Car extends MovingObj {
         super(MovingObj.ObjType.CAR);
     }
 
+    public Car(Screen.Location loc) {
+        super(MovingObj.ObjType.CAR, loc);
+    }
+
     @Override
     public boolean canMove(MyDLList<Contents> contents) {
         return contents.size() == 1 && contents.contains(Contents.ROAD);

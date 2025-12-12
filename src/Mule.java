@@ -8,6 +8,10 @@ public class Mule extends MovingObj {
         super(MovingObj.ObjType.MULE);
     }
 
+    public Mule(Screen.Location loc) {
+        super(MovingObj.ObjType.MULE, loc);
+    }
+
     @Override
     public boolean canMove(MyDLList<Contents> contents) {
         return !(contents.size() > 1 || contents.contains(Contents.WATER) || contents.contains(Contents.ROAD));

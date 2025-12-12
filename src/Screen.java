@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
@@ -69,46 +70,63 @@ public class Screen extends JPanel implements KeyListener {
     public static int viewportX = 0, viewportY = 0;
     public final static int viewportWidth = 10, viewportHeight = 10;
     public final static int gridBoxSize = 1000 / viewportWidth;
-    public final static MyDLList<MovingObj> movingObjs = new MyDLList<>();
-
-    public Screen() {
-        setLayout(null);
-        setFocusable(true);
-        try {
-            FileInputStream fis = new FileInputStream("src/map.txt");
-
-            ObjectInputStream in = new ObjectInputStream(fis);
-
-            map = (MyHashTable<Location, Contents>) in.readObject();
+    public static MyDLList<MovingObj> movingObjs = null;
+    
+        public Screen() {
+            setLayout(null);
+            setFocusable(true);
+            try {
+                FileInputStream fis = new FileInputStream("src/map.txt");
+    
+                ObjectInputStream in = new ObjectInputStream(fis);
+    
+                map = (MyHashTable<Location, Contents>) in.readObject();
+    
+                fis.close();
+                in.close();
+            } catch (FileNotFoundException ex) {
+                System.out.println("Failed to read!");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            try {
+                FileInputStream fis = new FileInputStream("src/player.txt");
+    
+                ObjectInputStream in = new ObjectInputStream(fis);
+    
+                viewportX = in.readInt();
+                viewportY = in.readInt();
+    
+                fis.close();
+                in.close();
+            } catch (FileNotFoundException ex) {
+                System.out.println("Using default list");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            try {
+                FileInputStream fis = new FileInputStream("src/moving_objs.txt");
+    
+                ObjectInputStream in = new ObjectInputStream(fis);
+    
+                movingObjs = (MyDLList<MovingObj>) in.readObject();
 
             fis.close();
             in.close();
         } catch (FileNotFoundException ex) {
-            System.out.println("Failed to read!");
+            System.out.println("Failed to read moving objs");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        try {
-            FileInputStream fis = new FileInputStream("src/player.txt");
-
-            ObjectInputStream in = new ObjectInputStream(fis);
-
-            viewportX = in.readInt();
-            viewportY = in.readInt();
-
-            fis.close();
-            in.close();
-        } catch (FileNotFoundException ex) {
-            System.out.println("Using default list");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        for (int i = 0; i < 100; i++) {
-            switch ((int) (Math.random() * 4)) {
-                case 0 -> movingObjs.add(new Car());
-                case 1 -> movingObjs.add(new Boat());
-                case 2 -> movingObjs.add(new Mule());
-                case 3 -> movingObjs.add(new Bear());
+        if (movingObjs == null) {
+            movingObjs = new MyDLList<>();
+            for (int i = 0; i < 100; i++) {
+                switch ((int) (Math.random() * 4)) {
+                    case 0 -> movingObjs.add(new Car());
+                    case 1 -> movingObjs.add(new Boat());
+                    case 2 -> movingObjs.add(new Mule());
+                    case 3 -> movingObjs.add(new Bear());
+                }
             }
         }
         addKeyListener(this);
@@ -182,6 +200,34 @@ public class Screen extends JPanel implements KeyListener {
         }
     }
 
+    public void onClose() {
+        try {
+            FileOutputStream out;
+            ObjectOutputStream outObj;
+            out = new FileOutputStream("src/player.txt");
+            outObj = new ObjectOutputStream(out);
+            outObj.writeInt(viewportX);
+            outObj.writeInt(viewportY);
+            outObj.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Didn't write player coordinates");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try {
+            FileOutputStream out;
+            ObjectOutputStream outObj;
+            out = new FileOutputStream("src/moving_objs.txt");
+            outObj = new ObjectOutputStream(out);
+            outObj.writeObject(movingObjs);
+            outObj.close();
+        } catch (FileNotFoundException ex) {
+            System.out.println("Didn't write moving objs position");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public void moveViewport(int xDiff, int yDiff) {
         viewportX += xDiff;
         viewportY += yDiff;
@@ -218,19 +264,6 @@ public class Screen extends JPanel implements KeyListener {
             case KeyEvent.VK_D -> moveViewport(1, 0);
         }
         repaint();
-        try {
-            FileOutputStream out;
-            ObjectOutputStream outObj;
-            out = new FileOutputStream("src/player.txt");
-            outObj = new ObjectOutputStream(out);
-            outObj.writeInt(viewportX);
-            outObj.writeInt(viewportY);
-            outObj.close();
-        } catch (FileNotFoundException ex) {
-            System.out.println("Didn't write player coordinates");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     public void keyReleased(KeyEvent e) {
