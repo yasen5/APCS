@@ -2,10 +2,10 @@ package src;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.WindowAdapter;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
@@ -178,6 +178,60 @@ public class Screen extends JPanel implements KeyListener {
         for (MovingObj obj : movingObjs) {
             obj.drawMe(g);
         }
+        displayLandmarks(g, 0, 1);
+        displayLandmarks(g, 1, 0);
+        displayLandmarks(g, 1, 1);
+        displayLandmarks(g, 0, 0);
+        displayLandmarks(g, 0, -1);
+        displayLandmarks(g, -1, 0);
+        displayLandmarks(g, -1, -1);
+        displayLandmarks(g, -1, 1);
+        displayLandmarks(g, 1, -1);
+    }
+
+    public void displayLandmarks(Graphics g, int xDiff, int yDiff) {
+        BufferedImage img = null;
+        String name = null;
+        String caption = null;
+        for (Contents content : map.get(new Location(viewportY + viewportHeight/2 + xDiff, viewportX + viewportWidth/2 + yDiff))) {
+            if (content == Contents.CACTUS || content == Contents.HOUSE || content == Contents.TREE) {
+                continue;
+            }
+            if (contentImages.get(content) != null) {
+                img = contentImages.get(content);
+                name = content.name();
+                switch (content) {
+                    case SANTA_FE_NATIONAL_FOREST -> {
+                        caption = "A forest";
+                    }
+                    case RIO_GRANDE_DEL_NORTE_NATIONAL_MONUMENT -> {
+                        caption = "A monument";
+                    }
+                    case RIO_GRANDE_GORGE_BRIDGE -> {
+                        caption = "A bridge";
+                    }
+                    case ASSISI_BASILICA -> {
+                        caption = "A basilica";
+                    }
+                    case GILA_NATIONAL_FOREST -> {
+                        caption = "A forest";
+                    }
+                    default -> {
+                        System.out.println("Got an image from invalid source");
+                        System.exit(0);
+                    }
+                }
+                break;
+            }
+        }
+        if (img == null) 
+            return;
+        g.drawImage(img, 200, 200, 600, 600, this);
+        g.setColor(Color.WHITE);
+        g.fillRect(200, 800, 600, 100);
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Comic Sans", 0, 30));
+        g.drawString(caption, 200, 900);
     }
 
     public void onClose() {
