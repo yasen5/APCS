@@ -55,7 +55,7 @@ public class Screen extends JPanel implements KeyListener {
 
     public static MyHashTable<Location, Contents> map;
     public static int viewportX = 0, viewportY = 0;
-    public final static int viewportWidth = 100, viewportHeight = 100;
+    public final static int viewportWidth = 10, viewportHeight = 10;
     public final static int gridBoxSize = 1000 / viewportWidth;
     public static MyDLList<MovingObj> movingObjs = null;
     public static MyHashMap<Contents, Color> colorMap = new MyHashMap<>();
