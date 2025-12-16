@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
@@ -54,15 +55,16 @@ public class Screen extends JPanel implements KeyListener {
 
     public static MyHashTable<Location, Contents> map;
     public static int viewportX = 0, viewportY = 0;
-    public final static int viewportWidth = 10, viewportHeight = 10;
+    public final static int viewportWidth = 100, viewportHeight = 100;
     public final static int gridBoxSize = 1000 / viewportWidth;
     public static MyDLList<MovingObj> movingObjs = null;
     public static MyHashMap<Contents, Color> colorMap = new MyHashMap<>();
+    private Tourist tourist;
 
     static {
         contentImages = new MyHashMap<>();
         Contents[] contentValues = Contents.values();
-        for (int i = 1; i < 8; i++) {
+        for (int i = 1; i <= 8; i++) {
             try {
                 contentImages.put(contentValues[i],
                         ImageIO.read(new File("/Users/yasen/AdvCSQ2Proj/src/images/"
@@ -82,6 +84,7 @@ public class Screen extends JPanel implements KeyListener {
     public Screen() {
         setLayout(null);
         setFocusable(true);
+        this.tourist = new Tourist();
         try {
             FileInputStream fis = new FileInputStream("src/map.txt");
 
@@ -141,10 +144,15 @@ public class Screen extends JPanel implements KeyListener {
             new Thread(obj).start();
         }
         new Thread(new Animator(this)).start();
+        JButton saveButton = new JButton("Save");
+        saveButton.setBounds(1000, 0, 100, 100);
+        saveButton.addActionListener((ActionEvent e) -> onClose());
+        saveButton.setFocusable(false);
+        this.add(saveButton);
     }
 
     public Dimension getPreferredSize() {
-        return new Dimension(1000, 1000);
+        return new Dimension(1100, 1000);
     }
 
     public void paintComponent(Graphics g) {
@@ -165,19 +173,10 @@ public class Screen extends JPanel implements KeyListener {
                 }
             }
         }
-        // Tourist
-        g.setColor(new Color(107, 70, 11));
-        g.fillRect((int) (5.25 * gridBoxSize), (int) (5.25 * gridBoxSize), gridBoxSize / 2, gridBoxSize / 2);
-        g.setColor(Color.PINK);
-        g.fillOval((int) ((5.5 - 0.2) * gridBoxSize), (int) ((5) * gridBoxSize - 0.2),
-                (int) (0.4 * gridBoxSize), (int) (0.4 * gridBoxSize));
-        g.fillRect((int) ((5.25 - 0.1) * gridBoxSize), (int) ((5.3) * gridBoxSize), (int) (0.1 * gridBoxSize),
-                (int) (gridBoxSize / 3));
-        g.fillRect((int) ((5.75) * gridBoxSize), (int) ((5.3) * gridBoxSize), (int) (0.1 * gridBoxSize),
-                (int) (gridBoxSize / 3));
         for (MovingObj obj : movingObjs) {
             obj.drawMe(g);
         }
+        tourist.drawMe(g);
         displayLandmarks(g, 0, 1);
         displayLandmarks(g, 1, 0);
         displayLandmarks(g, 1, 1);
@@ -193,7 +192,8 @@ public class Screen extends JPanel implements KeyListener {
         BufferedImage img = null;
         String name = null;
         String caption = null;
-        for (Contents content : map.get(new Location(viewportY + viewportHeight/2 + xDiff, viewportX + viewportWidth/2 + yDiff))) {
+        for (Contents content : map
+                .get(new Location(viewportY + viewportHeight / 2 + xDiff, viewportX + viewportWidth / 2 + yDiff))) {
             if (content == Contents.CACTUS || content == Contents.HOUSE || content == Contents.TREE) {
                 continue;
             }
@@ -202,19 +202,19 @@ public class Screen extends JPanel implements KeyListener {
                 name = content.name();
                 switch (content) {
                     case SANTA_FE_NATIONAL_FOREST -> {
-                        caption = "A forest";
+                        caption = "Covers 1.6 million acres of mountains, valleys and mesas ranging from 5,000 to 13,000 feet in elevation";
                     }
                     case RIO_GRANDE_DEL_NORTE_NATIONAL_MONUMENT -> {
-                        caption = "A monument";
+                        caption = "Has the Taos Plateau volcanic field. Contains many grazing animals";
                     }
                     case RIO_GRANDE_GORGE_BRIDGE -> {
-                        caption = "A bridge";
+                        caption = "7th highest bridge in U.S., completed 1965";
                     }
                     case ASSISI_BASILICA -> {
-                        caption = "A basilica";
+                        caption = "Replaced an adobe church that was destroyed in the Pueblo Revolt of 1680";
                     }
                     case GILA_NATIONAL_FOREST -> {
-                        caption = "A forest";
+                        caption = "6th largest national forest in the U.S. Houses the Gila monster species";
                     }
                     default -> {
                         System.out.println("Got an image from invalid source");
@@ -224,14 +224,15 @@ public class Screen extends JPanel implements KeyListener {
                 break;
             }
         }
-        if (img == null) 
+        if (img == null)
             return;
         g.drawImage(img, 200, 200, 600, 600, this);
         g.setColor(Color.WHITE);
         g.fillRect(200, 800, 600, 100);
         g.setColor(Color.BLACK);
-        g.setFont(new Font("Comic Sans", 0, 30));
-        g.drawString(caption, 200, 900);
+        g.setFont(new Font("Comic Sans", 0, 15));
+        g.drawString(name.replaceAll("_", " "), 200, 850);
+        g.drawString(caption, 200, 890);
     }
 
     public void onClose() {
@@ -288,6 +289,7 @@ public class Screen extends JPanel implements KeyListener {
             viewportY -= yDiff;
             viewportX -= xDiff;
         }
+
     }
 
     public void keyPressed(KeyEvent e) {
