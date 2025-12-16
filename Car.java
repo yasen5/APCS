@@ -1,14 +1,14 @@
-package src;
 
-import src.Screen.Contents;
-import src.util.MyDLList;
+import util.Types.Contents;
+import util.Types.Location;
+import util.MyDLList;
 
 public class Car extends MovingObj {
     public Car() {
         super(MovingObj.ObjType.CAR);
     }
 
-    public Car(Screen.Location loc) {
+    public Car(Location loc) {
         super(MovingObj.ObjType.CAR, loc);
     }
 

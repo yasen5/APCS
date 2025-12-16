@@ -1,4 +1,4 @@
-package src.util;
+package util;
 
 public class MyHashMap<K, V> {
     private Object[] hashArray;

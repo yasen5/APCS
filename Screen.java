@@ -1,4 +1,3 @@
-package src;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -12,9 +11,11 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-import src.util.MyDLList;
-import src.util.MyHashMap;
-import src.util.MyHashTable;
+import util.MyDLList;
+import util.MyHashMap;
+import util.MyHashTable;
+import util.Types.Contents;
+import util.Types.Location;
 
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -26,32 +27,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 public class Screen extends JPanel implements KeyListener {
-    public enum Contents {
-        NONE,
-        TREE,
-        HOUSE,
-        CACTUS,
-        SANTA_FE_NATIONAL_FOREST,
-        RIO_GRANDE_DEL_NORTE_NATIONAL_MONUMENT,
-        RIO_GRANDE_GORGE_BRIDGE,
-        ASSISI_BASILICA,
-        GILA_NATIONAL_FOREST,
-        WATER,
-        ROAD,
-        DIRT,
-        GRASS,
-        DESERT,
-        BORDER
-    }
-
     public static MyHashMap<Contents, BufferedImage> contentImages;
-
-    public static record Location(int row, int col) implements Serializable {
-        @Override
-        public int hashCode() {
-            return 100 * row + col;
-        }
-    }
 
     public static MyHashTable<Location, Contents> map;
     public static int viewportX = 0, viewportY = 0;
@@ -67,7 +43,7 @@ public class Screen extends JPanel implements KeyListener {
         for (int i = 1; i <= 8; i++) {
             try {
                 contentImages.put(contentValues[i],
-                        ImageIO.read(new File("/Users/yasen/AdvCSQ2Proj/src/images/"
+                        ImageIO.read(new File("/Users/yasen/AdvCSQ2Proj/images/"
                                 + contentValues[i].name().toLowerCase() + ".png")));
             } catch (IOException e) {
                 System.out.println("Error for reading " + contentValues[i].name() + " " + e);
@@ -86,7 +62,7 @@ public class Screen extends JPanel implements KeyListener {
         setFocusable(true);
         this.tourist = new Tourist();
         try {
-            FileInputStream fis = new FileInputStream("src/map.txt");
+            FileInputStream fis = new FileInputStream("map.txt");
 
             ObjectInputStream in = new ObjectInputStream(fis);
 
@@ -100,7 +76,7 @@ public class Screen extends JPanel implements KeyListener {
             ex.printStackTrace();
         }
         try {
-            FileInputStream fis = new FileInputStream("src/player.txt");
+            FileInputStream fis = new FileInputStream("player.txt");
 
             ObjectInputStream in = new ObjectInputStream(fis);
 
@@ -115,7 +91,7 @@ public class Screen extends JPanel implements KeyListener {
             ex.printStackTrace();
         }
         try {
-            FileInputStream fis = new FileInputStream("src/moving_objs.txt");
+            FileInputStream fis = new FileInputStream("moving_objs.txt");
 
             ObjectInputStream in = new ObjectInputStream(fis);
 
@@ -239,7 +215,7 @@ public class Screen extends JPanel implements KeyListener {
         try {
             FileOutputStream out;
             ObjectOutputStream outObj;
-            out = new FileOutputStream("src/player.txt");
+            out = new FileOutputStream("player.txt");
             outObj = new ObjectOutputStream(out);
             outObj.writeInt(viewportX);
             outObj.writeInt(viewportY);
@@ -252,7 +228,7 @@ public class Screen extends JPanel implements KeyListener {
         try {
             FileOutputStream out;
             ObjectOutputStream outObj;
-            out = new FileOutputStream("src/moving_objs.txt");
+            out = new FileOutputStream("moving_objs.txt");
             outObj = new ObjectOutputStream(out);
             outObj.writeObject(movingObjs);
             outObj.close();

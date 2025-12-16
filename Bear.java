@@ -1,14 +1,14 @@
-package src;
 
-import src.Screen.Contents;
-import src.util.MyDLList;
+import util.Types.Contents;
+import util.Types.Location;
+import util.MyDLList;
 
 public class Bear extends MovingObj {
     public Bear() {
         super(MovingObj.ObjType.BEAR);
     }
 
-    public Bear(Screen.Location loc) {
+    public Bear(Location loc) {
         super(MovingObj.ObjType.BEAR, loc);
     }
 

@@ -1,4 +1,3 @@
-package src;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,26 +7,27 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Scanner;
 
-import src.Screen.Contents;
-import src.util.MyHashMap;
-import src.util.MyHashTable;
+import util.Types.Contents;
+import util.Types.Location;
+import util.MyHashMap;
+import util.MyHashTable;
 
 public class MapReader {
     public static void main(String[] args) {
-        MyHashTable<Screen.Location, Screen.Contents> map = new MyHashTable<>();
-        MyHashMap<String, Screen.Contents> contentMap = new MyHashMap<>();
-        contentMap.put("1", Screen.Contents.DESERT);
-        contentMap.put("2", Screen.Contents.DIRT);
-        contentMap.put("3", Screen.Contents.WATER);
-        contentMap.put("4", Screen.Contents.BORDER);
-        contentMap.put("5", Screen.Contents.GRASS);
-        contentMap.put("6", Screen.Contents.ROAD);
+        MyHashTable<Location, Contents> map = new MyHashTable<>();
+        MyHashMap<String, Contents> contentMap = new MyHashMap<>();
+        contentMap.put("1", Contents.DESERT);
+        contentMap.put("2", Contents.DIRT);
+        contentMap.put("3", Contents.WATER);
+        contentMap.put("4", Contents.BORDER);
+        contentMap.put("5", Contents.GRASS);
+        contentMap.put("6", Contents.ROAD);
         try {
-            FileInputStream fis = new FileInputStream("/Users/yasen/AdvCSQ2Proj/src/map.txt");
+            FileInputStream fis = new FileInputStream("/Users/yasen/AdvCSQ2Proj/map.txt");
 
             ObjectInputStream in = new ObjectInputStream(fis);
 
-            Scanner sc = new Scanner(new File("/Users/yasen/AdvCSQ2Proj/src/MapExportFile.txt"));
+            Scanner sc = new Scanner(new File("/Users/yasen/AdvCSQ2Proj/MapExportFile.txt"));
 
             int row = 0;
             while (sc.hasNextLine()) {
@@ -37,8 +37,8 @@ public class MapReader {
                 int col = 0;
                 String line = sc.nextLine();
                 for (String num : line.split(" ")) {
-                    Screen.Contents bg = contentMap.get(num);
-                    map.put(new Screen.Location(row, col), bg);
+                    Contents bg = contentMap.get(num);
+                    map.put(new Location(row, col), bg);
                     Contents thingOnTop = null;
                     if (col == 49 && row == 4) {
                         thingOnTop = Contents.RIO_GRANDE_DEL_NORTE_NATIONAL_MONUMENT;
@@ -63,7 +63,7 @@ public class MapReader {
                             thingOnTop = Contents.CACTUS;
                         }
                     }
-                    Screen.Location loc = new Screen.Location(row, col);
+                    Location loc = new Location(row, col);
                     if (thingOnTop != null) {
                         map.put(loc, thingOnTop);
                     }
@@ -83,7 +83,7 @@ public class MapReader {
         try {
             FileOutputStream out;
             ObjectOutputStream outObj;
-            out = new FileOutputStream("src/map.txt");
+            out = new FileOutputStream("map.txt");
             outObj = new ObjectOutputStream(out);
             // Create a data stream to read in
             outObj.writeObject(map);

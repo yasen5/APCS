@@ -1,4 +1,4 @@
-package src;
+
 
 public class Animator implements Runnable {
     Screen screen;

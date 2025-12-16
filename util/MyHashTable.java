@@ -1,4 +1,5 @@
-package src.util;
+package util;
+
 import java.io.Serializable;
 
 public class MyHashTable<K, V> implements Serializable {

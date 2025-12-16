@@ -1,4 +1,5 @@
-package src.util;
+package util;
+
 import java.util.Iterator;
 import java.io.Serializable;
 
@@ -59,14 +60,13 @@ public class MyDLList<E> implements Iterable<E>, Serializable {
 
     public DLNode<E> getNode(int index) {
         DLNode<E> currNode;
-        if (index > size/2) {
+        if (index > size / 2) {
             currNode = tail;
             for (int i = size; i > index; i--) {
                 currNode = currNode.getPrev();
             }
             return currNode;
-        }
-        else {
+        } else {
             currNode = head;
             for (int i = 0; i <= index; i++) {
                 currNode = currNode.getNext();
@@ -84,8 +84,7 @@ public class MyDLList<E> implements Iterable<E>, Serializable {
             joined += counter + ", ";
             joined += currNode.getValue();
             currNode = currNode.getNext();
-        }
-        while (currNode != tail);
+        } while (currNode != tail);
         return joined;
     }
 
@@ -139,5 +138,3 @@ public class MyDLList<E> implements Iterable<E>, Serializable {
         return false;
     }
 }
-
-

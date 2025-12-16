@@ -1,14 +1,14 @@
-package src;
 
-import src.Screen.Contents;
-import src.util.MyDLList;
+import util.Types.Contents;
+import util.Types.Location;
+import util.MyDLList;
 
 public class Mule extends MovingObj {
     public Mule() {
         super(MovingObj.ObjType.MULE);
     }
 
-    public Mule(Screen.Location loc) {
+    public Mule(Location loc) {
         super(MovingObj.ObjType.MULE, loc);
     }
 
