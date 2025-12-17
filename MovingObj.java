@@ -21,7 +21,7 @@ public abstract class MovingObj implements Runnable, Serializable {
         for (int i = 0; i < contentValues.length; i++) {
             try {
                 images.put(contentValues[i],
-                        ImageIO.read(new File("/Users/yasen/AdvCSQ2Proj/images/"
+                        ImageIO.read(new File("images/"
                                 + contentValues[i].name().toLowerCase() + ".png")));
             } catch (IOException e) {
                 System.out.println("Error for reading " + contentValues[i].name() + " " + e);

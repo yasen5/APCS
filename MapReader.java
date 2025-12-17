@@ -23,11 +23,11 @@ public class MapReader {
         contentMap.put("5", Contents.GRASS);
         contentMap.put("6", Contents.ROAD);
         try {
-            FileInputStream fis = new FileInputStream("/Users/yasen/AdvCSQ2Proj/map.txt");
+            FileInputStream fis = new FileInputStream("map.txt");
 
             ObjectInputStream in = new ObjectInputStream(fis);
 
-            Scanner sc = new Scanner(new File("/Users/yasen/AdvCSQ2Proj/MapExportFile.txt"));
+            Scanner sc = new Scanner(new File("MapExportFile.txt"));
 
             int row = 0;
             while (sc.hasNextLine()) {

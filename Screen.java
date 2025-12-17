@@ -43,7 +43,7 @@ public class Screen extends JPanel implements KeyListener {
         for (int i = 1; i <= 8; i++) {
             try {
                 contentImages.put(contentValues[i],
-                        ImageIO.read(new File("/Users/yasen/AdvCSQ2Proj/images/"
+                        ImageIO.read(new File("images/"
                                 + contentValues[i].name().toLowerCase() + ".png")));
             } catch (IOException e) {
                 System.out.println("Error for reading " + contentValues[i].name() + " " + e);
